@@ -6,65 +6,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family: 'Segoe UI', sans-serif;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
 
 body{
-  height:100vh;
+  min-height:100vh;
   display:flex;
   flex-direction:column;
   justify-content:center;
   align-items:center;
-  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  background:radial-gradient(circle at top,#1f2937,#0f172a);
   color:white;
 }
 
-/* Animated Title */
 .title{
-  font-size:32px;
+  font-size:30px;
   font-weight:900;
-  margin-bottom:30px;
-  background: linear-gradient(90deg,#00ffff,#00ff99,#00ccff);
-  background-size:200%;
+  margin:20px 0;
+  background:linear-gradient(90deg,#00ffff,#00ff99,#00ccff);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
-  animation:move 4s linear infinite;
 }
 
-@keyframes move{
-  0%{background-position:0%;}
-  100%{background-position:200%;}
-}
-
-/* Card */
 .card{
-  width:340px;
-  padding:30px;
+  width:360px;
+  padding:20px;
   border-radius:20px;
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(15px);
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(15px);
   box-shadow:0 0 30px rgba(0,0,0,0.6);
   text-align:center;
 }
 
-input{
-  width:100%;
-  padding:12px;
-  border-radius:10px;
-  border:none;
-  font-size:16px;
-  text-align:center;
-  margin-bottom:15px;
-}
-
 button{
   width:100%;
-  padding:12px;
-  margin-top:10px;
+  padding:10px;
+  margin-top:8px;
   border:none;
   border-radius:10px;
   font-weight:bold;
@@ -72,28 +48,45 @@ button{
   transition:0.3s;
 }
 
-.main{
-  background:linear-gradient(45deg,#00ffff,#00cc66);
-  color:black;
-}
+.mode{background:rgba(255,255,255,0.1);color:white;}
+.main{background:linear-gradient(45deg,#00ffff,#00cc66);color:black;}
+.win-btn{background:#00cc66;color:white;}
+.loss-btn{background:#cc0033;color:white;}
 
-.main:hover{
-  transform:scale(1.05);
-  box-shadow:0 0 15px #00ffff;
-}
-
-.link{
-  background:rgba(255,255,255,0.1);
-  color:white;
-}
-
-.link:hover{
-  background:rgba(255,255,255,0.2);
-}
+#timer{margin-top:10px;font-size:18px;}
 
 #result{
+  margin-top:10px;
+  font-size:20px;
+  opacity:0;
+  transform:scale(0.8);
+  transition:0.4s ease;
+}
+
+.show-result{
+  opacity:1 !important;
+  transform:scale(1) !important;
+}
+
+.stats{margin-top:15px;font-size:14px;}
+
+.history{
   margin-top:15px;
-  font-size:18px;
+  max-height:120px;
+  overflow-y:auto;
+  text-align:left;
+  font-size:13px;
+}
+
+.history div{
+  padding:3px 0;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+.live{
+  margin-bottom:10px;
+  font-size:14px;
+  color:#00ff99;
 }
 </style>
 </head>
@@ -104,44 +97,132 @@ button{
 
 <div class="card">
 
-  <input type="number" id="period" placeholder="Enter Last 3 Digit">
+  <div id="liveCounter" class="live">🔴 Live Members: 0</div>
 
-  <button class="main" onclick="predict()">
-    Get Prediction
-  </button>
+  <button class="mode" onclick="startTimer(30)">30 Second Prediction</button>
+  <button class="mode" onclick="startTimer(60)">1 Minute Prediction</button>
 
+  <div id="timer">Timer: 0</div>
   <div id="result"></div>
 
-  <button class="link" onclick="window.open('https://t.me/T4HKR','_blank')">
-    Contact Owner
-  </button>
+  <button class="win-btn" onclick="markWin()">WIN</button>
+  <button class="loss-btn" onclick="markLoss()">LOSS</button>
 
-  <button class="link" onclick="window.open('https://t.me/gamesgoagamess','_blank')">
-    Official Channel
-  </button>
+  <div class="stats">
+    Wins: <span id="winCount">0</span> |
+    Losses: <span id="lossCount">0</span><br>
+    Win %: <span id="winPercent">0%</span>
+  </div>
+
+  <div class="history" id="history"></div>
 
 </div>
 
 <script>
-function predict(){
-  let value=document.getElementById("period").value;
+let countdown;
+let currentTime=0;
+let wins=0;
+let losses=0;
 
-  if(value.length!=3){
-    alert("Enter exactly 3 digits");
-    return;
-  }
+/* ===== Smooth Number Animation ===== */
+function animateValue(elementId, start, end, duration){
+  let range = end - start;
+  let current = start;
+  let increment = range / (duration / 16);
+  let obj = document.getElementById(elementId);
 
-  let last=value[value.length-1];
+  let timer = setInterval(()=>{
+    current += increment;
+    if((increment > 0 && current >= end) || (increment < 0 && current <= end)){
+      current = end;
+      clearInterval(timer);
+    }
+    obj.innerText = Math.floor(current);
+  },16);
+}
+
+/* ===== Timer ===== */
+function startTimer(seconds){
+  clearInterval(countdown);
+  currentTime=seconds;
+  document.getElementById("result").classList.remove("show-result");
+  document.getElementById("result").innerHTML="";
+
+  countdown=setInterval(()=>{
+    document.getElementById("timer").innerHTML="Timer: "+currentTime+"s";
+    currentTime--;
+
+    if(currentTime<0){
+      clearInterval(countdown);
+      generatePrediction();
+    }
+  },1000);
+}
+
+/* ===== Animated Prediction ===== */
+function generatePrediction(){
+  let random=Math.random()<0.5?"SMALL":"BIG";
   let result=document.getElementById("result");
 
-  if(last<=4){
-    result.innerHTML="Prediction: SMALL";
-    result.style.color="#ffcc00";
-  }else{
-    result.innerHTML="Prediction: BIG";
-    result.style.color="#00ff99";
+  result.innerHTML="Prediction: "+random;
+  result.style.color=random==="SMALL"?"#ffcc00":"#00ff99";
+
+  setTimeout(()=>{
+    result.classList.add("show-result");
+  },100);
+}
+
+/* ===== Win/Loss ===== */
+function markWin(){
+  let oldWins=wins;
+  wins++;
+  updateStats(oldWins,losses);
+  addHistory("WIN");
+}
+
+function markLoss(){
+  let oldLoss=losses;
+  losses++;
+  updateStats(wins,oldLoss);
+  addHistory("LOSS");
+}
+
+function updateStats(oldW,oldL){
+  animateValue("winCount",oldW,wins,400);
+  animateValue("lossCount",oldL,losses,400);
+
+  let total=wins+losses;
+  let percent= total>0 ? ((wins/total)*100).toFixed(1) : 0;
+  document.getElementById("winPercent").innerText=percent+"%";
+}
+
+function addHistory(type){
+  let history=document.getElementById("history");
+  let entry=document.createElement("div");
+  entry.innerText="Result: "+type;
+  history.prepend(entry);
+
+  if(history.children.length>10){
+    history.removeChild(history.lastChild);
   }
 }
+
+/* ===== Animated Live Counter ===== */
+let liveCount = 2000 + Math.floor(Math.random()*1000);
+
+function updateLiveCounter(){
+  let change = Math.floor(Math.random()*21)-10;
+  let old=liveCount;
+  liveCount += change;
+
+  if(liveCount<2000) liveCount=2000;
+  if(liveCount>3000) liveCount=3000;
+
+  animateValue("liveCounter",old,liveCount,600);
+}
+
+setInterval(updateLiveCounter,3000);
+document.getElementById("liveCounter").innerText="🔴 Live Members: "+liveCount;
 </script>
 
 </body>
