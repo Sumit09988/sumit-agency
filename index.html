@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Sumit Agency</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body{
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:white;
+}
+
+/* Animated Title */
+.title{
+  font-size:32px;
+  font-weight:900;
+  margin-bottom:30px;
+  background: linear-gradient(90deg,#00ffff,#00ff99,#00ccff);
+  background-size:200%;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:move 4s linear infinite;
+}
+
+@keyframes move{
+  0%{background-position:0%;}
+  100%{background-position:200%;}
+}
+
+/* Card */
+.card{
+  width:340px;
+  padding:30px;
+  border-radius:20px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(15px);
+  box-shadow:0 0 30px rgba(0,0,0,0.6);
+  text-align:center;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:none;
+  font-size:16px;
+  text-align:center;
+  margin-bottom:15px;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.main{
+  background:linear-gradient(45deg,#00ffff,#00cc66);
+  color:black;
+}
+
+.main:hover{
+  transform:scale(1.05);
+  box-shadow:0 0 15px #00ffff;
+}
+
+.link{
+  background:rgba(255,255,255,0.1);
+  color:white;
+}
+
+.link:hover{
+  background:rgba(255,255,255,0.2);
+}
+
+#result{
+  margin-top:15px;
+  font-size:18px;
+}
+</style>
+</head>
+
+<body>
+
+<h1 class="title">SUMIT AGENCY</h1>
+
+<div class="card">
+
+  <input type="number" id="period" placeholder="Enter Last 3 Digit">
+
+  <button class="main" onclick="predict()">
+    Get Prediction
+  </button>
+
+  <div id="result"></div>
+
+  <button class="link" onclick="window.open('https://t.me/T4HKR','_blank')">
+    Contact Owner
+  </button>
+
+  <button class="link" onclick="window.open('https://t.me/gamesgoagamess','_blank')">
+    Official Channel
+  </button>
+
+</div>
+
+<script>
+function predict(){
+  let value=document.getElementById("period").value;
+
+  if(value.length!=3){
+    alert("Enter exactly 3 digits");
+    return;
+  }
+
+  let last=value[value.length-1];
+  let result=document.getElementById("result");
+
+  if(last<=4){
+    result.innerHTML="Prediction: SMALL";
+    result.style.color="#ffcc00";
+  }else{
+    result.innerHTML="Prediction: BIG";
+    result.style.color="#00ff99";
+  }
+}
+</script>
+
+</body>
+</html>
