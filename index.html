@@ -13,81 +13,68 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
-  background:linear-gradient(135deg,#0f172a,#1e293b);
+  background:#000;
   color:white;
 }
 
-.container{width:360px;text-align:center;}
+.container{
+  width:360px;
+  text-align:center;
+}
 
 .title{
   font-size:28px;
   font-weight:900;
   margin-bottom:15px;
-  background:linear-gradient(90deg,#00ffff,#00ff99);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
+  color:#00ffcc;
+  text-shadow:0 0 20px #00ffcc;
 }
 
-/* Top Mode Buttons */
-.mode-container{
-  display:flex;
-  gap:10px;
-  margin-bottom:15px;
+.live{
+  font-size:14px;
+  color:#00ff99;
+  margin-bottom:10px;
 }
 
-.mode{
-  flex:1;
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  background:rgba(255,255,255,0.1);
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
-  transition:0.3s;
-}
-
-.mode:hover{
-  background:#00ff99;
-  color:black;
-  box-shadow:0 0 15px #00ff99;
-}
-
-/* Glow Main Button */
-.glow-btn{
-  padding:12px;
+button{
   width:100%;
+  padding:12px;
+  margin-top:8px;
   border:none;
   border-radius:12px;
   font-weight:bold;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.glow{
   background:#00ffcc;
   color:black;
-  cursor:pointer;
-  margin-bottom:15px;
-  transition:0.3s;
   box-shadow:0 0 10px #00ffcc;
 }
 
-.glow-btn:hover{
-  box-shadow:0 0 25px #00ffcc, 0 0 40px #00ffcc;
+.glow:hover{
+  box-shadow:0 0 25px #00ffcc;
   transform:scale(1.05);
 }
 
-/* Card */
-.card{
-  padding:20px;
-  border-radius:20px;
-  background:rgba(255,255,255,0.05);
-  backdrop-filter:blur(12px);
-  box-shadow:0 0 25px rgba(0,0,0,0.6);
+.dark-btn{
+  background:#111;
+  color:white;
+  border:1px solid #00ffcc;
+}
+
+#timer{
+  margin-top:15px;
+  font-size:18px;
 }
 
 input{
   width:100%;
   padding:10px;
+  margin-top:10px;
   border-radius:10px;
   border:none;
-  margin-bottom:10px;
   text-align:center;
 }
 
@@ -96,7 +83,10 @@ input{
   font-weight:bold;
 }
 
-.hidden{display:none;}
+.stats{
+  margin-top:15px;
+  font-size:14px;
+}
 </style>
 </head>
 
@@ -106,56 +96,98 @@ input{
 
 <h1 class="title">SUMIT AGENCY</h1>
 
-<!-- TOP MODE BUTTONS -->
-<div class="mode-container">
-  <button class="mode" onclick="setMode(30)">30 Sec</button>
-  <button class="mode" onclick="setMode(60)">1 Min</button>
+<div id="liveCounter" class="live">🔴 Live Members: 0</div>
+
+<button class="dark-btn" onclick="selectMode(30)">30 Sec</button>
+<button class="dark-btn" onclick="selectMode(60)">1 Min</button>
+
+<div id="timer">Timer: 0</div>
+
+<input type="number" id="period" placeholder="Enter Last 3 Digit">
+
+<button class="glow" onclick="manualPrediction()">Get Prediction</button>
+
+<div id="prediction"></div>
+
+<div class="stats">
+Win %: <span id="winPercent">0%</span>
 </div>
 
-<!-- GLOW BUTTON -->
-<button class="glow-btn" onclick="toggleInput()">
-  Start Prediction
+<button class="dark-btn" onclick="window.open('https://t.me/T4HKR','_blank')">
+Contact Owner
 </button>
 
-<div class="card hidden" id="predictionCard">
-
-  <input type="number" id="period" placeholder="Enter Period Number">
-
-  <button class="glow-btn" onclick="generatePrediction()">
-    Get Prediction
-  </button>
-
-  <div id="prediction"></div>
-
-</div>
+<button class="dark-btn" onclick="window.open('https://t.me/gamesgoagamess','_blank')">
+Official Channel
+</button>
 
 </div>
 
 <script>
-let selectedMode=30;
+let mode=30;
+let countdown;
+let timeLeft=0;
+let wins=0;
+let total=0;
 
-function setMode(seconds){
-  selectedMode=seconds;
-  alert("Mode Selected: "+seconds+" Seconds");
+/* Mode Selection */
+function selectMode(seconds){
+  mode=seconds;
+  startTimer();
 }
 
-function toggleInput(){
-  document.getElementById("predictionCard").classList.toggle("hidden");
+/* Auto Loop Timer */
+function startTimer(){
+  clearInterval(countdown);
+  timeLeft=mode;
+
+  countdown=setInterval(()=>{
+    document.getElementById("timer").innerText="Timer: "+timeLeft+"s";
+    timeLeft--;
+
+    if(timeLeft<0){
+      generatePrediction();
+      timeLeft=mode; // auto restart
+    }
+  },1000);
 }
 
+/* Prediction */
 function generatePrediction(){
-  let value=document.getElementById("period").value;
+  let period=document.getElementById("period").value;
+  if(period.length<1) return;
 
-  if(value===""){
-    alert("Enter Period Number");
-    return;
-  }
+  let result=Math.random()<0.5?"BIG":"SMALL";
 
-  let random=Math.random()<0.5?"BIG":"SMALL";
-  let output=document.getElementById("prediction");
-  output.innerText="Prediction ("+selectedMode+"s): "+random;
-  output.style.color=random==="BIG"?"#22c55e":"#facc15";
+  document.getElementById("prediction").innerText=
+  "Prediction: "+result;
+
+  total++;
+  if(result==="BIG") wins++;
+
+  let percent=((wins/total)*100).toFixed(1);
+  document.getElementById("winPercent").innerText=percent+"%";
 }
+
+/* Manual Button */
+function manualPrediction(){
+  generatePrediction();
+}
+
+/* Fake Live Counter (UI only) */
+let live=2000+Math.floor(Math.random()*1000);
+
+function updateLive(){
+  let change=Math.floor(Math.random()*21)-10;
+  live+=change;
+  if(live<2000) live=2000;
+  if(live>3000) live=3000;
+  document.getElementById("liveCounter").innerText=
+  "🔴 Live Members: "+live;
+}
+
+setInterval(updateLive,3000);
+updateLive();
 </script>
 
 </body>
