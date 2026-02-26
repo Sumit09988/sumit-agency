@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Sumit Agency</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:white;
+}
+
+/* Animated Gradient Title */
+.animated-title{
+  position:absolute;
+  top:60px;
+  font-size:32px;
+  font-weight:900;
+  letter-spacing:3px;
+  background: linear-gradient(90deg,#00ffcc,#00ff99,#00ccff,#ff00cc,#00ffcc);
+  background-size:300%;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation: gradientMove 6s linear infinite;
+}
+
+@keyframes gradientMove{
+  0%{background-position:0%;}
+  100%{background-position:300%;}
+}
+
+/* Glass Card */
+.card{
+  width:350px;
+  padding:35px;
+  border-radius:20px;
+  backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.08);
+  box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  text-align:center;
+  animation: fadeIn 1s ease-in-out;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:none;
+  outline:none;
+  font-size:16px;
+  text-align:center;
+  margin-bottom:15px;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  font-size:15px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.main-btn{
+  background:linear-gradient(45deg,#00ffcc,#00cc66);
+  color:black;
+}
+
+.main-btn:hover{
+  transform:scale(1.05);
+  box-shadow:0 0 20px #00ffcc;
+}
+
+.link-btn{
+  background:rgba(255,255,255,0.1);
+  color:white;
+}
+
+.link-btn:hover{
+  background:rgba(255,255,255,0.2);
+}
+
+#result{
+  margin-top:15px;
+  font-size:18px;
+}
+
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(20px);}
+  to{opacity:1; transform:translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<h1 class="animated-title">SUMIT AGENCY</h1>
+
+<div class="card">
+
+  <input type="number" id="period" placeholder="Enter Last 3 Digit">
+
+  <button class="main-btn" onclick="predict()">
+    Get Prediction
+  </button>
+
+  <div id="result"></div>
+
+  <button class="link-btn" onclick="window.open('https://t.me/T4HKR','_blank')">
+    Contact Owner
+  </button>
+
+  <button class="link-btn" onclick="window.open('https://t.me/gamesgoagamess','_blank')">
+    Official Channel
+  </button>
+
+</div>
+
+<script>
+function predict(){
+  let value=document.getElementById("period").value;
+
+  if(value.length!=3){
+    alert("Enter exactly 3 digits");
+    return;
+  }
+
+  let last=value[value.length-1];
+  let result=document.getElementById("result");
+
+  if(last<=4){
+    result.innerHTML="Prediction: SMALL";
+    result.style.color="#ffcc00";
+  }else{
+    result.innerHTML="Prediction: BIG";
+    result.style.color="#00ff99";
+  }
+}
+</script>
+
+</body>
+</html>
