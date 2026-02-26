@@ -10,81 +10,44 @@
   margin:0;
   padding:0;
   box-sizing:border-box;
-  font-family:'Segoe UI', sans-serif;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 body{
   height:100vh;
   display:flex;
+  flex-direction:column;
   justify-content:center;
   align-items:center;
-  overflow:hidden;
+  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:white;
 }
 
-/* ===== VIDEO BACKGROUND ===== */
-.video-bg{
-  position:fixed;
-  right:0;
-  bottom:0;
-  min-width:100%;
-  min-height:100%;
-  object-fit:cover;
-  z-index:-3;
-}
-
-/* Cyberpunk overlay tint */
-.overlay{
-  position:fixed;
-  width:100%;
-  height:100%;
-  background:linear-gradient(45deg,rgba(0,255,255,0.2),rgba(255,0,255,0.2));
-  z-index:-2;
-}
-
-/* Smoke effect overlay */
-.smoke{
-  position:fixed;
-  width:100%;
-  height:100%;
-  background:radial-gradient(circle at 50% 80%, rgba(255,255,255,0.15), transparent 70%);
-  animation:smokeMove 8s ease-in-out infinite alternate;
-  z-index:-1;
-}
-
-@keyframes smokeMove{
-  from{opacity:0.3;}
-  to{opacity:0.6;}
-}
-
-/* Animated Neon Title */
-.animated-title{
-  position:absolute;
-  top:40px;
-  font-size:36px;
+/* Animated Title */
+.title{
+  font-size:32px;
   font-weight:900;
-  letter-spacing:3px;
-  background: linear-gradient(90deg,#00ffff,#ff00ff,#00ffff);
-  background-size:300%;
+  margin-bottom:30px;
+  background: linear-gradient(90deg,#00ffff,#00ff99,#00ccff);
+  background-size:200%;
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
-  animation: gradientMove 5s linear infinite;
-  text-shadow:0 0 20px #00ffff;
+  animation:move 4s linear infinite;
 }
 
-@keyframes gradientMove{
+@keyframes move{
   0%{background-position:0%;}
-  100%{background-position:300%;}
+  100%{background-position:200%;}
 }
 
-/* Glass Card */
+/* Card */
 .card{
-  width:360px;
-  padding:35px;
+  width:340px;
+  padding:30px;
   border-radius:20px;
-  backdrop-filter: blur(20px);
-  background: rgba(0,0,0,0.6);
-  box-shadow: 0 0 40px rgba(0,255,255,0.4);
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(15px);
+  box-shadow:0 0 30px rgba(0,0,0,0.6);
   text-align:center;
 }
 
@@ -93,7 +56,6 @@ input{
   padding:12px;
   border-radius:10px;
   border:none;
-  outline:none;
   font-size:16px;
   text-align:center;
   margin-bottom:15px;
@@ -106,29 +68,27 @@ button{
   border:none;
   border-radius:10px;
   font-weight:bold;
-  font-size:15px;
   cursor:pointer;
   transition:0.3s;
 }
 
-.main-btn{
-  background:linear-gradient(45deg,#00ffff,#00ccff);
+.main{
+  background:linear-gradient(45deg,#00ffff,#00cc66);
   color:black;
 }
 
-.main-btn:hover{
+.main:hover{
   transform:scale(1.05);
-  box-shadow:0 0 20px #00ffff;
+  box-shadow:0 0 15px #00ffff;
 }
 
-.link-btn{
+.link{
   background:rgba(255,255,255,0.1);
   color:white;
 }
 
-.link-btn:hover{
+.link:hover{
   background:rgba(255,255,255,0.2);
-  transform:scale(1.05);
 }
 
 #result{
@@ -140,30 +100,23 @@ button{
 
 <body>
 
-<video autoplay muted loop class="video-bg">
-  <source src="https://cdn.coverr.co/videos/coverr-car-drifting-on-track-9700/1080p.mp4" type="video/mp4">
-</video>
-
-<div class="overlay"></div>
-<div class="smoke"></div>
-
-<h1 class="animated-title">SUMIT AGENCY</h1>
+<h1 class="title">SUMIT AGENCY</h1>
 
 <div class="card">
 
   <input type="number" id="period" placeholder="Enter Last 3 Digit">
 
-  <button class="main-btn" onclick="predict()">
+  <button class="main" onclick="predict()">
     Get Prediction
   </button>
 
   <div id="result"></div>
 
-  <button class="link-btn" onclick="window.open('https://t.me/T4HKR','_blank')">
+  <button class="link" onclick="window.open('https://t.me/T4HKR','_blank')">
     Contact Owner
   </button>
 
-  <button class="link-btn" onclick="window.open('https://t.me/gamesgoagamess','_blank')">
+  <button class="link" onclick="window.open('https://t.me/gamesgoagamess','_blank')">
     Official Channel
   </button>
 
