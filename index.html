@@ -11,218 +11,151 @@
 body{
   min-height:100vh;
   display:flex;
-  flex-direction:column;
   justify-content:center;
   align-items:center;
-  background:radial-gradient(circle at top,#1f2937,#0f172a);
+  background:linear-gradient(135deg,#0f172a,#1e293b);
   color:white;
 }
 
+.container{width:360px;text-align:center;}
+
 .title{
-  font-size:30px;
+  font-size:28px;
   font-weight:900;
-  margin:20px 0;
-  background:linear-gradient(90deg,#00ffff,#00ff99,#00ccff);
+  margin-bottom:15px;
+  background:linear-gradient(90deg,#00ffff,#00ff99);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
 }
 
-.card{
-  width:360px;
-  padding:20px;
-  border-radius:20px;
-  background:rgba(255,255,255,0.05);
-  backdrop-filter:blur(15px);
-  box-shadow:0 0 30px rgba(0,0,0,0.6);
-  text-align:center;
+/* Top Mode Buttons */
+.mode-container{
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
 }
 
-button{
-  width:100%;
+.mode{
+  flex:1;
   padding:10px;
-  margin-top:8px;
   border:none;
   border-radius:10px;
+  background:rgba(255,255,255,0.1);
+  color:white;
   font-weight:bold;
   cursor:pointer;
   transition:0.3s;
 }
 
-.mode{background:rgba(255,255,255,0.1);color:white;}
-.main{background:linear-gradient(45deg,#00ffff,#00cc66);color:black;}
-.win-btn{background:#00cc66;color:white;}
-.loss-btn{background:#cc0033;color:white;}
-
-#timer{margin-top:10px;font-size:18px;}
-
-#result{
-  margin-top:10px;
-  font-size:20px;
-  opacity:0;
-  transform:scale(0.8);
-  transition:0.4s ease;
+.mode:hover{
+  background:#00ff99;
+  color:black;
+  box-shadow:0 0 15px #00ff99;
 }
 
-.show-result{
-  opacity:1 !important;
-  transform:scale(1) !important;
+/* Glow Main Button */
+.glow-btn{
+  padding:12px;
+  width:100%;
+  border:none;
+  border-radius:12px;
+  font-weight:bold;
+  background:#00ffcc;
+  color:black;
+  cursor:pointer;
+  margin-bottom:15px;
+  transition:0.3s;
+  box-shadow:0 0 10px #00ffcc;
 }
 
-.stats{margin-top:15px;font-size:14px;}
-
-.history{
-  margin-top:15px;
-  max-height:120px;
-  overflow-y:auto;
-  text-align:left;
-  font-size:13px;
+.glow-btn:hover{
+  box-shadow:0 0 25px #00ffcc, 0 0 40px #00ffcc;
+  transform:scale(1.05);
 }
 
-.history div{
-  padding:3px 0;
-  border-bottom:1px solid rgba(255,255,255,0.1);
+/* Card */
+.card{
+  padding:20px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(12px);
+  box-shadow:0 0 25px rgba(0,0,0,0.6);
 }
 
-.live{
+input{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:none;
   margin-bottom:10px;
-  font-size:14px;
-  color:#00ff99;
+  text-align:center;
 }
+
+#prediction{
+  margin-top:10px;
+  font-weight:bold;
+}
+
+.hidden{display:none;}
 </style>
 </head>
 
 <body>
 
+<div class="container">
+
 <h1 class="title">SUMIT AGENCY</h1>
 
-<div class="card">
+<!-- TOP MODE BUTTONS -->
+<div class="mode-container">
+  <button class="mode" onclick="setMode(30)">30 Sec</button>
+  <button class="mode" onclick="setMode(60)">1 Min</button>
+</div>
 
-  <div id="liveCounter" class="live">🔴 Live Members: 0</div>
+<!-- GLOW BUTTON -->
+<button class="glow-btn" onclick="toggleInput()">
+  Start Prediction
+</button>
 
-  <button class="mode" onclick="startTimer(30)">30 Second Prediction</button>
-  <button class="mode" onclick="startTimer(60)">1 Minute Prediction</button>
+<div class="card hidden" id="predictionCard">
 
-  <div id="timer">Timer: 0</div>
-  <div id="result"></div>
+  <input type="number" id="period" placeholder="Enter Period Number">
 
-  <button class="win-btn" onclick="markWin()">WIN</button>
-  <button class="loss-btn" onclick="markLoss()">LOSS</button>
+  <button class="glow-btn" onclick="generatePrediction()">
+    Get Prediction
+  </button>
 
-  <div class="stats">
-    Wins: <span id="winCount">0</span> |
-    Losses: <span id="lossCount">0</span><br>
-    Win %: <span id="winPercent">0%</span>
-  </div>
+  <div id="prediction"></div>
 
-  <div class="history" id="history"></div>
+</div>
 
 </div>
 
 <script>
-let countdown;
-let currentTime=0;
-let wins=0;
-let losses=0;
+let selectedMode=30;
 
-/* ===== Smooth Number Animation ===== */
-function animateValue(elementId, start, end, duration){
-  let range = end - start;
-  let current = start;
-  let increment = range / (duration / 16);
-  let obj = document.getElementById(elementId);
-
-  let timer = setInterval(()=>{
-    current += increment;
-    if((increment > 0 && current >= end) || (increment < 0 && current <= end)){
-      current = end;
-      clearInterval(timer);
-    }
-    obj.innerText = Math.floor(current);
-  },16);
+function setMode(seconds){
+  selectedMode=seconds;
+  alert("Mode Selected: "+seconds+" Seconds");
 }
 
-/* ===== Timer ===== */
-function startTimer(seconds){
-  clearInterval(countdown);
-  currentTime=seconds;
-  document.getElementById("result").classList.remove("show-result");
-  document.getElementById("result").innerHTML="";
-
-  countdown=setInterval(()=>{
-    document.getElementById("timer").innerHTML="Timer: "+currentTime+"s";
-    currentTime--;
-
-    if(currentTime<0){
-      clearInterval(countdown);
-      generatePrediction();
-    }
-  },1000);
+function toggleInput(){
+  document.getElementById("predictionCard").classList.toggle("hidden");
 }
 
-/* ===== Animated Prediction ===== */
 function generatePrediction(){
-  let random=Math.random()<0.5?"SMALL":"BIG";
-  let result=document.getElementById("result");
+  let value=document.getElementById("period").value;
 
-  result.innerHTML="Prediction: "+random;
-  result.style.color=random==="SMALL"?"#ffcc00":"#00ff99";
-
-  setTimeout(()=>{
-    result.classList.add("show-result");
-  },100);
-}
-
-/* ===== Win/Loss ===== */
-function markWin(){
-  let oldWins=wins;
-  wins++;
-  updateStats(oldWins,losses);
-  addHistory("WIN");
-}
-
-function markLoss(){
-  let oldLoss=losses;
-  losses++;
-  updateStats(wins,oldLoss);
-  addHistory("LOSS");
-}
-
-function updateStats(oldW,oldL){
-  animateValue("winCount",oldW,wins,400);
-  animateValue("lossCount",oldL,losses,400);
-
-  let total=wins+losses;
-  let percent= total>0 ? ((wins/total)*100).toFixed(1) : 0;
-  document.getElementById("winPercent").innerText=percent+"%";
-}
-
-function addHistory(type){
-  let history=document.getElementById("history");
-  let entry=document.createElement("div");
-  entry.innerText="Result: "+type;
-  history.prepend(entry);
-
-  if(history.children.length>10){
-    history.removeChild(history.lastChild);
+  if(value===""){
+    alert("Enter Period Number");
+    return;
   }
+
+  let random=Math.random()<0.5?"BIG":"SMALL";
+  let output=document.getElementById("prediction");
+  output.innerText="Prediction ("+selectedMode+"s): "+random;
+  output.style.color=random==="BIG"?"#22c55e":"#facc15";
 }
-
-/* ===== Animated Live Counter ===== */
-let liveCount = 2000 + Math.floor(Math.random()*1000);
-
-function updateLiveCounter(){
-  let change = Math.floor(Math.random()*21)-10;
-  let old=liveCount;
-  liveCount += change;
-
-  if(liveCount<2000) liveCount=2000;
-  if(liveCount>3000) liveCount=3000;
-
-  animateValue("liveCounter",old,liveCount,600);
-}
-
-setInterval(updateLiveCounter,3000);
-document.getElementById("liveCounter").innerText="🔴 Live Members: "+liveCount;
 </script>
 
 </body>
