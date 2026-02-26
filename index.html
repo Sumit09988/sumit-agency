@@ -14,78 +14,139 @@ body{
   justify-content:center;
   align-items:center;
   background:#000;
+  overflow:hidden;
   color:white;
 }
 
+/* Animated Background */
+body::before{
+  content:"";
+  position:absolute;
+  width:700px;
+  height:700px;
+  background:radial-gradient(circle,#00ffcc33,transparent 70%);
+  animation:bgMove 10s infinite alternate ease-in-out;
+}
+@keyframes bgMove{
+  from{transform:translate(-200px,-150px);}
+  to{transform:translate(200px,150px);}
+}
+
 .container{
-  width:360px;
+  width:370px;
   text-align:center;
+  padding:20px;
+  border-radius:20px;
+  background:#0a0a0a;
+  position:relative;
+  z-index:1;
+}
+
+/* Neon Border */
+.container::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  border-radius:22px;
+  padding:2px;
+  background:linear-gradient(45deg,#00ffcc,#0ea5e9,#ec4899);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  animation:borderMove 4s linear infinite;
+}
+@keyframes borderMove{
+  0%{filter:hue-rotate(0deg);}
+  100%{filter:hue-rotate(360deg);}
 }
 
 .title{
-  font-size:28px;
+  font-size:26px;
   font-weight:900;
-  margin-bottom:15px;
+  margin-bottom:10px;
   color:#00ffcc;
-  text-shadow:0 0 20px #00ffcc;
+  text-shadow:0 0 25px #00ffcc;
 }
 
 .live{
   font-size:14px;
-  color:#00ff99;
   margin-bottom:10px;
+  color:#00ff99;
 }
 
+/* Neon Pulse Buttons */
 button{
   width:100%;
   padding:12px;
-  margin-top:8px;
+  margin-top:10px;
   border:none;
   border-radius:12px;
   font-weight:bold;
   cursor:pointer;
-  transition:0.3s;
-}
-
-.glow{
-  background:#00ffcc;
-  color:black;
-  box-shadow:0 0 10px #00ffcc;
-}
-
-.glow:hover{
-  box-shadow:0 0 25px #00ffcc;
-  transform:scale(1.05);
-}
-
-.dark-btn{
-  background:#111;
   color:white;
-  border:1px solid #00ffcc;
+  animation:pulse 2s infinite;
 }
 
-#timer{
-  margin-top:15px;
-  font-size:18px;
+@keyframes pulse{
+  0%{box-shadow:0 0 10px currentColor;}
+  50%{box-shadow:0 0 25px currentColor;}
+  100%{box-shadow:0 0 10px currentColor;}
+}
+
+.blue{background:#0ea5e9;color:#0ea5e9;}
+.green{background:#16a34a;color:#16a34a;}
+.pink{background:#ec4899;color:#ec4899;}
+.yellow{background:#eab308;color:#eab308;}
+
+#circle{
+  margin:15px auto;
+  width:120px;
+  height:120px;
+  position:relative;
+}
+
+svg{
+  transform:rotate(-90deg);
+}
+
+circle{
+  fill:none;
+  stroke-width:8;
+  stroke:#00ffcc;
+  stroke-dasharray:314;
+  stroke-dashoffset:314;
+  transition:stroke-dashoffset 1s linear;
+}
+
+#timeText{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:20px;
 }
 
 input{
   width:100%;
   padding:10px;
-  margin-top:10px;
   border-radius:10px;
   border:none;
+  margin-top:10px;
+  background:#111;
+  color:#00ffcc;
   text-align:center;
 }
 
 #prediction{
   margin-top:10px;
+  font-size:18px;
   font-weight:bold;
 }
 
 .stats{
-  margin-top:15px;
-  font-size:14px;
+  margin-top:10px;
 }
 </style>
 </head>
@@ -95,17 +156,21 @@ input{
 <div class="container">
 
 <h1 class="title">SUMIT AGENCY</h1>
-
 <div id="liveCounter" class="live">🔴 Live Members: 0</div>
 
-<button class="dark-btn" onclick="selectMode(30)">30 Sec</button>
-<button class="dark-btn" onclick="selectMode(60)">1 Min</button>
+<button class="blue" onclick="selectMode(30)">30 Sec</button>
+<button class="blue" onclick="selectMode(60)">1 Min</button>
 
-<div id="timer">Timer: 0</div>
+<div id="circle">
+<svg width="120" height="120">
+<circle cx="60" cy="60" r="50" id="progressCircle"></circle>
+</svg>
+<div id="timeText">0</div>
+</div>
 
 <input type="number" id="period" placeholder="Enter Last 3 Digit">
 
-<button class="glow" onclick="manualPrediction()">Get Prediction</button>
+<button class="green" onclick="manualPrediction()">Get Prediction</button>
 
 <div id="prediction"></div>
 
@@ -113,11 +178,11 @@ input{
 Win %: <span id="winPercent">0%</span>
 </div>
 
-<button class="dark-btn" onclick="window.open('https://t.me/T4HKR','_blank')">
+<button class="pink" onclick="window.open('https://t.me/T4HKR','_blank')">
 Contact Owner
 </button>
 
-<button class="dark-btn" onclick="window.open('https://t.me/gamesgoagamess','_blank')">
+<button class="yellow" onclick="window.open('https://t.me/gamesgoagamess','_blank')">
 Official Channel
 </button>
 
@@ -125,40 +190,39 @@ Official Channel
 
 <script>
 let mode=30;
-let countdown;
 let timeLeft=0;
+let interval;
 let wins=0;
 let total=0;
+const circle=document.getElementById("progressCircle");
+const circumference=314;
 
-/* Mode Selection */
 function selectMode(seconds){
   mode=seconds;
   startTimer();
 }
 
-/* Auto Loop Timer */
 function startTimer(){
-  clearInterval(countdown);
+  clearInterval(interval);
   timeLeft=mode;
-
-  countdown=setInterval(()=>{
-    document.getElementById("timer").innerText="Timer: "+timeLeft+"s";
+  interval=setInterval(()=>{
+    document.getElementById("timeText").innerText=timeLeft;
+    let offset=circumference-(timeLeft/mode)*circumference;
+    circle.style.strokeDashoffset=offset;
     timeLeft--;
 
     if(timeLeft<0){
       generatePrediction();
-      timeLeft=mode; // auto restart
+      timeLeft=mode;
     }
   },1000);
 }
 
-/* Prediction */
 function generatePrediction(){
   let period=document.getElementById("period").value;
   if(period.length<1) return;
 
   let result=Math.random()<0.5?"BIG":"SMALL";
-
   document.getElementById("prediction").innerText=
   "Prediction: "+result;
 
@@ -169,14 +233,12 @@ function generatePrediction(){
   document.getElementById("winPercent").innerText=percent+"%";
 }
 
-/* Manual Button */
 function manualPrediction(){
   generatePrediction();
 }
 
-/* Fake Live Counter (UI only) */
+/* Live Counter */
 let live=2000+Math.floor(Math.random()*1000);
-
 function updateLive(){
   let change=Math.floor(Math.random()*21)-10;
   live+=change;
@@ -185,7 +247,6 @@ function updateLive(){
   document.getElementById("liveCounter").innerText=
   "🔴 Live Members: "+live;
 }
-
 setInterval(updateLive,3000);
 updateLive();
 </script>
